@@ -7,6 +7,7 @@ Author: Gregory Bastianelli
 Author URI: http://drunk.kiwi
 Text Domain: msp-shipping
 */
+
 add_action( 'admin_init', 'msp_register_settings');
 function msp_register_settings(){
   register_setting( 'msp_shipping_creds', 'msp_ups_api_key' );
@@ -174,11 +175,7 @@ if( ! function_exists( 'sc_get_usps_delivery_date' ) ){
   function sc_get_usps_delivery_date( $tracking ){
     $request = sc_create_usps_tracking_request( $tracking );
     $response = sc_get_xml_by_curl( $request );
-    // pre_dump( $response );
-    preg_match( '/([A-Za-z])+ (\d*), (\d*)/', $response['TrackInfo']['TrackSummary'], $delivery_date);
-    preg_match( '/delivered/', $response['TrackInfo']['TrackSummary'], $is_delivered );
-    if( empty( $is_delivered ) ) $is_delivered = 'Delivers';
-    return ucfirst($is_delivered[0]) . ' ' . $delivery_date[0];
+    if( isset( $response['TrackInfo']['TrackSummary'] ) ) return $response['TrackInfo']['TrackSummary'];
   }
 }
 
