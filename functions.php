@@ -160,6 +160,7 @@ if( ! function_exists( 'sc_get_fedex_delivery_date' ) ){
   *
   */
   function sc_get_fedex_delivery_date( $tracking ){
+    return 'Click to see Tracking';
   }
 
 }
