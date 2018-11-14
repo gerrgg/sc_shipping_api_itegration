@@ -18,6 +18,7 @@ function msp_register_settings(){
   register_setting( 'msp_shipping_creds', 'msp_fedex_api_key' );
   register_setting( 'msp_shipping_creds', 'msp_fedex_user_name' );
   register_setting( 'msp_shipping_creds', 'msp_fedex_password' );
+  register_setting( 'msp_shipping_creds', 'msp_log_to_file' );
 }
 
 add_action( 'admin_menu', 'sc_setup_shipping_integration' );
@@ -30,6 +31,15 @@ if( ! function_exists( 'sc_setup_shipping_integration' ) ){
   */
   function sc_setup_shipping_integration(){
     add_plugins_page( 'MSP Shipping Integration', 'MSP Shipping Integration', 'administrator', 'msp_ship_menu', 'msp_ship_menu_html' );
+  }
+}
+
+if( ! function_exists( 'sc_debug_log' ) ){
+  /**
+  *
+  */
+  function sc_debug_log( $data ){
+    file_put_contents( plugin_dir_path( __FILE__ ) . 'msp_debug.txt', print_r( $data, TRUE ), FILE_APPEND );
   }
 }
 
@@ -77,19 +87,11 @@ if( ! function_exists( 'msp_ship_menu_html' ) ){
             </tr>
 
             <tr valign="top">
-              <th scope="row">FEDEX API KEY</th>
-              <td><input type="text" name="msp_fedex_api_key" value="<?php echo esc_attr( get_option('msp_fedex_api_key') ); ?>" /></td>
+              <th scope="row">Check to Log to File</th>
+              <td><input type="checkbox" name="msp_log_to_file" value="1" <?php checked( get_option( 'msp_log_to_file' ) ); ?> /></td>
             </tr>
 
-            <tr valign="top">
-              <th scope="row">FEDEX USERNAME</th>
-              <td><input type="text" name="msp_fedex_user_name" value="<?php echo esc_attr( get_option('msp_fedex_user_name') ); ?>" /></td>
-            </tr>
 
-            <tr valign="top">
-              <th scope="row">FEDEX PASSWORD</th>
-              <td><input type="password" name="msp_fedex_password" value="<?php echo esc_attr( get_option('msp_fedex_password') ); ?>" /></td>
-            </tr>
         </table>
         <?php submit_button(); ?>
         </form>

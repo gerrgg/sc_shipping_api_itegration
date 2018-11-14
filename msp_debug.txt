@@ -1,1 +1,140 @@
-November 13, 2018
+Array
+(
+    [time] => 1542214492
+    [order] => 596
+    [tracking] => Array
+        (
+            [shipper] => usps
+            [tracking] => 9405 8036 9930 0719 9487 09
+            [link] => https://tools.usps.com/go/TrackConfirmAction?tLabels=9405 8036 9930 0719 9487 09
+        )
+
+    [function] => sc_get_usps_delivery_date
+    [output] => Your item was delivered at the front door or porch at 12:21 pm on November 13, 2018 in DISTRICT HEIGHTS, MD 20747.
+)
+Array
+(
+    [time] => 1542214530
+    [order] => 634
+    [tracking] => Array
+        (
+            [shipper] => ups
+            [tracking] => 1ZE743540354791735
+            [link] => https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums=1ZE743540354791735
+        )
+
+    [function] => sc_get_ups_delivery_date
+    [output] =>
+)
+Array
+(
+    [time] => 1542214531
+    [order] => 633
+    [tracking] => Array
+        (
+            [shipper] => usps
+            [tracking] => 9405803699300721449140
+            [link] => https://tools.usps.com/go/TrackConfirmAction?tLabels=9405803699300721449140
+        )
+
+    [function] => sc_get_usps_delivery_date
+    [output] => Your item departed our USPS facility in TRAVERSE CITY MI DISTRIBUTION CENTER on November 14, 2018 at 5:04 am. The item is currently in transit to the destination.
+)
+Array
+(
+    [time] => 1542214531
+    [order] => 596
+    [tracking] => Array
+        (
+            [shipper] => usps
+            [tracking] => 9405 8036 9930 0719 9487 09
+            [link] => https://tools.usps.com/go/TrackConfirmAction?tLabels=9405 8036 9930 0719 9487 09
+        )
+
+    [function] => sc_get_usps_delivery_date
+    [output] => Your item was delivered at the front door or porch at 12:21 pm on November 13, 2018 in DISTRICT HEIGHTS, MD 20747.
+)
+Array
+(
+    [time] => 1542215045
+    [order] => 634
+    [tracking] => Array
+        (
+            [shipper] => ups
+            [tracking] => 1ZE743540354791735
+            [link] => https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums=1ZE743540354791735
+        )
+
+    [function] => sc_get_ups_delivery_date
+    [output] => 
+)
+Array
+(
+    [time] => 1542215046
+    [order] => 633
+    [tracking] => Array
+        (
+            [shipper] => usps
+            [tracking] => 9405803699300721449140
+            [link] => https://tools.usps.com/go/TrackConfirmAction?tLabels=9405803699300721449140
+        )
+
+    [function] => sc_get_usps_delivery_date
+    [output] => Your item departed our USPS facility in TRAVERSE CITY MI DISTRIBUTION CENTER on November 14, 2018 at 5:04 am. The item is currently in transit to the destination.
+)
+Array
+(
+    [time] => 1542215046
+    [order] => 596
+    [tracking] => Array
+        (
+            [shipper] => usps
+            [tracking] => 9405 8036 9930 0719 9487 09
+            [link] => https://tools.usps.com/go/TrackConfirmAction?tLabels=9405 8036 9930 0719 9487 09
+        )
+
+    [function] => sc_get_usps_delivery_date
+    [output] => Your item was delivered at the front door or porch at 12:21 pm on November 13, 2018 in DISTRICT HEIGHTS, MD 20747.
+)
+Array
+(
+    [time] => 11/14/2018
+    [order] => 634
+    [tracking] => Array
+        (
+            [shipper] => ups
+            [tracking] => 1ZE743540354791735
+            [link] => https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums=1ZE743540354791735
+        )
+
+    [function] => sc_get_ups_delivery_date
+    [output] => 
+)
+Array
+(
+    [time] => 11/14/2018
+    [order] => 633
+    [tracking] => Array
+        (
+            [shipper] => usps
+            [tracking] => 9405803699300721449140
+            [link] => https://tools.usps.com/go/TrackConfirmAction?tLabels=9405803699300721449140
+        )
+
+    [function] => sc_get_usps_delivery_date
+    [output] => Your item departed our USPS facility in TRAVERSE CITY MI DISTRIBUTION CENTER on November 14, 2018 at 5:04 am. The item is currently in transit to the destination.
+)
+Array
+(
+    [time] => 11/14/2018
+    [order] => 596
+    [tracking] => Array
+        (
+            [shipper] => usps
+            [tracking] => 9405 8036 9930 0719 9487 09
+            [link] => https://tools.usps.com/go/TrackConfirmAction?tLabels=9405 8036 9930 0719 9487 09
+        )
+
+    [function] => sc_get_usps_delivery_date
+    [output] => Your item was delivered at the front door or porch at 12:21 pm on November 13, 2018 in DISTRICT HEIGHTS, MD 20747.
+)
