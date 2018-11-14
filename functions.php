@@ -7,8 +7,20 @@ Author: Gregory Bastianelli
 Author URI: http://drunk.kiwi
 Text Domain: msp-shipping
 */
+register_activation_hook( plugin_dir_path( __FILE__) , 'msp_plugin_activate' );
+if( ! function_exists( 'msp_plugin_activate' ) ){
+  /**
+  *
+  * sets the plugin up and creates return page
+  *
+  */
+  function msp_plugin_activate(){
+    add_action( 'admin_init', 'msp_register_settings');
+  }
+}
 
-add_action( 'admin_init', 'msp_register_settings');
+
+
 function msp_register_settings(){
   register_setting( 'msp_shipping_creds', 'msp_ups_api_key' );
   register_setting( 'msp_shipping_creds', 'msp_ups_user_name' );
@@ -19,6 +31,19 @@ function msp_register_settings(){
   register_setting( 'msp_shipping_creds', 'msp_fedex_user_name' );
   register_setting( 'msp_shipping_creds', 'msp_fedex_password' );
   register_setting( 'msp_shipping_creds', 'msp_log_to_file' );
+}
+
+add_action( 'msp_after_my_account_order_actions', 'sc_return_item_html', 5, 1 );
+if( ! function_exists( 'sc_return_item_html' ) ){
+  /**
+  *
+  */
+  function sc_return_item_html( $order_id ){
+    // TODO: Add logic which will only display the button if an order can be returned
+    $return_btn = '<a href="'. get_site_url( ) .'/returns?id='. $order_id .'" class="woocommerce-button button">Return</a>';
+    echo $return_btn;
+  }
+
 }
 
 add_action( 'admin_menu', 'sc_setup_shipping_integration' );

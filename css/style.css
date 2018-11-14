@@ -1,0 +1,23 @@
+.main-page-wrapper{
+  padding-top: 25px;
+}
+.item-wrapper{
+  border-bottom: 1px solid #f7f7f7;
+}
+.btn-iww{
+  background-color: #e54d3d;
+  color: #fff;
+}
+.return_thumb > i.fa-check-circle{
+  text-align: center;
+  color: green;
+  opacity: .25;
+}
+
+.return_thumb[aria-checked="true"] > i.fa-check-circle{
+  display: block;
+}
+
+.return_thumb[aria-checked="false"] > i.fa-check-circle{
+  display: none;
+}
