@@ -96,6 +96,30 @@ add_action( 'admin_post_nopriv_confirm_return', 'msp_confirm_return' );
 if( ! function_exists( 'msp_confirm_return' ) ){
   function msp_confirm_return(){
     pre_dump( $_POST );
+    $order = wc_get_order( $_POST['order_id'] );
+    if( $order ){
+      $returns = array(
+        'name'  => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+        'email' => $order->get_billing_email(),
+        'order' => $order->get_id(),
+      );
+      foreach( $_POST as $key => $item ){
+        if( $key != 'order_id' && $key != 'action' ){
+          $product = wc_get_product( $key );
+          if( $product ){
+            $returns['items'][$key] = array(
+              'name' => $product->get_formatted_name(),
+              'weight' => $product->get_weight(),
+            );
+
+            // TODO: how do we get the reasons in this array?
+            // TODO: Also include the quantity, even if return_all is yes.
+
+          }
+        }
+      }
+      pre_dump( $returns );
+    }
   }
 }
 
