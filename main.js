@@ -1,19 +1,28 @@
 jQuery(document).ready(function( $ ){
+  var $submit = $( 'button.button' );
+  var $check = $('#check_return');
+  var $confirm_box = $( '#return-data' );
+
   $('form').on('click', '.return-product', function(){
     var id = $(this).attr('id');
     var qty = $(this).attr( 'data-qty' );
     var $image = $(this).find('div').find('div.return-product-img');
-    var $ready_confirmation = $('.return-confrimation');
     var $form = $('.' + id + '_hidden-return-form' );
+    var src = $image.find( 'img' ).attr('src');
 
     // allows form to easily pop in and out;
     if( ! $form.hasClass( 'show' ) ) {
       $form.addClass( 'show' );
       $image.attr( 'aria-checked', 'true' );
 
+      $item_confirm_box = create_confirm_box( id, src );
+
+      $confirm_box.append( $item_confirm_box );
+
       if( qty > 1  ){
         $form.append( create_return_all_form( id, qty ) );
       } else {
+        $('#' + id + '_return_quantity').html( qty );
         $form.append( create_return_reason_form( id ) );
       }
 
@@ -23,6 +32,7 @@ jQuery(document).ready(function( $ ){
         var awnser = this.value;
         if( awnser == 'yes' ){
           $form.append( create_return_reason_form( id ) );
+          $('#' + id + '_return_quantity').html( qty );
           $('#' + id + '_how_many').remove();
         } else {
           $form.append( create_how_many_form( id ) );
@@ -32,45 +42,70 @@ jQuery(document).ready(function( $ ){
 
       $form.on( 'blur', '#' + id + '_how_many_input', function(){
         var given_qty = this.value;
-        if( given_qty > qty ) $(this).val( qty );
+        ( given_qty > qty ) ? $(this).val( qty ) : $('#' + id + '_return_quantity').html( given_qty );
         // if already exists in DOM, do not make.
         if( ! $( '#' + id + '_reason_form' ).length && given_qty != '' ) $form.append( create_return_reason_form( id ) );
       } );
 
-      // $form.on( 'change', '#' + id + '_reason_select', function(){
-      //   var awnser = this.value;
-      //   if( awnser.length > 0 && awnser != 'Please select a reason for return' ){
-      //     if( ! $('#' + id + '_ready').length ){
-      //       $ready = $( '<input/>', {
-      //         id: id + '_ready',
-      //         type: 'hidden',
-      //         name: id + '[ready]',
-      //         value: 'yes'
-      //       } )
-      //       $ready_confirmation.append( $ready );
-      //     } else {
-      //       $ready.remove();
-      //     }
-      //   }
-      // } );
+      $form.on( 'change', '#' + id + '_reason_select', function(){
+        var awnser = this.value;
+        if( awnser.length > 0 && awnser != 'Please select a reason for return' ){
+          $('#' + id + '_return_reason').html( awnser );
+        }
+      } );
 
     } else {
       $form.removeClass( 'show' );
       $image.attr( 'aria-checked', 'false' );
+      $item_confirm_box.remove();
       $form.html('');
       $('#' + id + '_ready').remove();
+
     }
 
   });
 
-  var $submit = $( 'button.button' );
-  var $check = $('#check_return');
+    $check.click(function(){
+      var checked = this.checked;
+      console.log( $confirm_box.text().length );
+      if ( $confirm_box.text().length ){
+        (checked) ? $submit.prop('disabled', false ) : $submit.prop('disabled', true );
+      }
+    });
 
-  $check.click(function(){
-    var checked = this.checked;
-    (checked) ? $submit.prop('disabled', false ) : $submit.prop('disabled', true );
-  })
 
+  function create_confirm_box( id, src ){
+    $box = $( '<div/>', {
+      id: id + '_confirm_box',
+      class: 'form-group confirm-box',
+    } );
+
+    // TODO: maybe do grid system
+    $img = $('<img/>', { src: src, class: 'thumbnail', style: 'height: 50px; padding-right: 10px;' });
+
+    $awnser_box = $( '<div/>' );
+    $qty_box = create_label_awnser( id, 'quantity' );
+    $reason_box = create_label_awnser( id, 'reason' );
+
+    $awnser_box.append( $qty_box, $reason_box );
+
+    $box.append( $img, $awnser_box );
+    return $box;
+  }
+
+  function create_label_awnser( id, key ){
+    $label_box = $('<p/>', {
+      class: 'label-awnser'
+    });
+    $label_box.append( uc_first(key) + ':', $('<span/>', {
+      id: id + '_return_' + key,
+    }));
+    return $label_box;
+  }
+
+  function uc_first(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
 
   function create_return_reason_form( id ){
     var $reason_form = $( '<div/>', {

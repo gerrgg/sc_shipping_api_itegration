@@ -286,7 +286,7 @@ if( ! function_exists( 'sc_get_ups_delivery_date' ) ){
     $trackRequestXML = sc_ups_create_tracking_request_xml( $tracking );
     $requestXML = $accessRequest->asXML() . $trackRequestXML->asXML();
     $response = sc_get_xml_by_curl( 'https://onlinetools.ups.com/ups.app/xml/Track', $requestXML );
-    sc_format_date_and_return( $response );
+    return sc_format_date_and_return( $response );
   }
 }
 
@@ -298,17 +298,18 @@ if( ! function_exists( 'sc_format_date_and_return' ) ){
   *
   */
   function sc_format_date_and_return( $shipment ){
-    if( ! isset( $shipment['Shipment']['ScheduledDeliveryDate'] ) ) return;
+    // pre_dump( $shipment );
 
     $delivery_details = array(
-      'date' => $shipment['Shipment']['ScheduledDeliveryDate'],
       'delivered' => $shipment['Shipment']['Package']['DeliveryIndicator'],
       'status' => $shipment['Shipment']['Package']['Activity'][0]['Status']['StatusType']['Description'],
     );
 
-    $timestamp = strtotime( $delivery_details['date'] );
-    $delivery_str = ( $delivery_details['delivered'] == 'N' ) ? 'Delivers ' . date('F j, Y', $timestamp) : 'Delivered ' . date('F j, Y', $timestamp);
-    return ( $delivery_details['status'] == 'Out For Delivery Today' ) ? $delivery_details['status'] : $delivery_str;
+    if( $delivery_details['delivered'] == 'Y' ){
+      return 'Delivered ' . date( 'F, j, Y', strtotime( $shipment['Shipment']['Package']['DeliveryDate'] ) );
+    } else {
+      return 'Delivers ' . date( 'F, j, Y', strtotime( $shipment['Shipment']['ScheduledDeliveryDate'] ) );
+    }
   }
 }
 

@@ -29,6 +29,9 @@
 .show{
   display: block!important;
 }
+p.label-awnser span{
+  padding-left: 1rem;
+}
 img.returning::after{
   font-family: "Font Awesome 5 Free";
    content: "\f095";
@@ -50,4 +53,10 @@ img.returning::after{
 .confirmation{
   border: 1px solid #eee;
   padding: 1rem;
+}
+.confirm-box{
+  display: flex;
+}
+.label-awnser{
+  margin: 0px;
 }
