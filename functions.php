@@ -7,19 +7,14 @@ Author: Gregory Bastianelli
 Author URI: http://drunk.kiwi
 Text Domain: msp-shipping
 */
-register_activation_hook( plugin_dir_path( __FILE__) , 'msp_plugin_activate' );
-if( ! function_exists( 'msp_plugin_activate' ) ){
-  /**
-  *
-  * sets the plugin up and creates return page
-  *
-  */
-  function msp_plugin_activate(){
-    add_action( 'admin_init', 'msp_register_settings');
-  }
+add_action( 'wp_enqueue_scripts', 'msp_enqueue_scripts');
+add_shortcode( 'return_form', 'msp_return_form_dispatcher' );
+add_action( 'admin_init', 'msp_register_settings');
+
+function msp_enqueue_scripts(){
+  wp_enqueue_style( 'style', plugin_dir_url( __FILE__ ) . '/style.css', false, rand(1, 1000), 'all' );
+  wp_enqueue_script( 'script', plugin_dir_url( __FILE__ ) . '/main.js', array( 'jquery' ), rand(1, 1000) );
 }
-
-
 
 function msp_register_settings(){
   register_setting( 'msp_shipping_creds', 'msp_ups_api_key' );
@@ -33,6 +28,139 @@ function msp_register_settings(){
   register_setting( 'msp_shipping_creds', 'msp_log_to_file' );
 }
 
+if( ! function_exists( 'msp_return_form_dispatcher' ) ){
+  /**
+  *
+  * checks for $_GET variables if none, then send to form to get it
+  *
+  */
+  function msp_return_form_dispatcher(){
+    if( isset( $_GET['id'], $_GET['email'] ) ){
+      msp_validate_user( $_GET['id'], $_GET['email'] );
+    } else {
+      msp_non_valid_user_return_form();
+    }
+  }
+}
+
+if( ! function_exists( 'msp_non_valid_user_return_form' ) ){
+  /**
+  * outputs the form for users to enter the order id and creds to verify user
+  * @param string $error - provides user with feedback when things dont match up.
+  */
+  function msp_non_valid_user_return_form( $error = '' ){
+    ?>
+    <div class="col-12 text-center">
+      <h4 class="danger"><?php echo $error; ?></h4>
+      <form class="text-center" method="GET" style="max-width: 450px; margin: auto">
+        <h2>Please log in, or enter the ID and Email attached to the order.</h2>
+        <div class="form-group">
+          <input type="tel" name="id" placeholder="Order ID" />
+          <input type="email" name="email" placeholder="youremail@example.com" />
+        </div>
+        <button type="submit" class="woocommerce-button button">Submit</button>
+      </form>
+    </div>
+    <?php
+  }
+}
+
+if( ! function_exists( 'msp_validate_user' ) ){
+  /**
+  *
+  * makes sure that the user is in fact the person who made the order
+  */
+  function msp_validate_user( $order_id, $given_email  ){
+    if( isset( $_GET['id'], $_GET['email'] ) ){
+        $order_id = $_GET['id'];
+        $given_email = $_GET['email'];
+    }
+
+    $order = wc_get_order( $order_id );
+    if( empty( $order ) ) {
+      msp_non_valid_user_return_form( 'Sorry, that order does not exist!' );
+    } else {
+      $order_email = $order->get_billing_email();
+      if( $order_email != urldecode( $given_email ) ){
+        msp_non_valid_user_return_form( 'Sorry, ' . urldecode( $given_email ) . ' that is not the email on the order!' );
+      } else {
+        msp_get_return_form_html( $order );
+      }
+    }
+  }
+}
+
+add_action( 'admin_post_confirm_return', 'msp_confirm_return' );
+add_action( 'admin_post_nopriv_confirm_return', 'msp_confirm_return' );
+
+if( ! function_exists( 'msp_confirm_return' ) ){
+  function msp_confirm_return(){
+    pre_dump( $_POST );
+  }
+}
+
+if( ! function_exists( 'msp_get_return_form_html' ) ){
+  function msp_get_return_form_html( $order ){
+    if( $order ){
+      $items = $order->get_items();
+      // pre_dump( $items );
+      ?>
+      <h3>Which Item's would you like to return/exchange?</h3>
+      <form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="row">
+        <div class="col-12 col-sm-6">
+          <?php foreach( $items as $key => $item ) : ?>
+            <?php $id = msp_get_actual_id( $item ); ?>
+            <?php $product = wc_get_product( $id ); ?>
+            <?php if( $product ) : ?>
+            <div id="<?php echo $id ?>" class="row return-product" data-qty="<?php echo $item['quantity'] ?>">
+              <div class="col-3">
+                <?php $image_src = wp_get_attachment_image_src( $product->get_image_id() ); ?>
+                <div class="return-product-img" aria-checked="false">
+                  <img src="<?php echo $image_src[0]; ?>" class="thumbnail" />
+                  <i class="fa fa-check-circle fa-4x"></i>
+                </div>
+              </div>
+              <div class="col-9">
+                <span class="title" style="margin: 0px;"><?php echo $product->get_name(); ?></span>
+                <span class="sku"><?php echo $product->get_sku(); ?></span><br>
+                <span class="price"><?php echo '$' . $item['total']; ?></span>
+              </div>
+              </div>
+            <div class=" <?php echo $id ?>_hidden-return-form hidden-return-form"></div>
+            <?php endif; ?>
+          <?php endforeach; ?>
+          <br>
+          <input type="hidden" name="order_id" value="<?php echo $order->get_id(); ?>">
+          <input type="hidden" name="action" value="confirm_return">
+        </div>
+        <div class="col-12 col-sm-6">
+          <div class="confirmation">
+            <h4>I am returning...</h4>
+            <div id="return-data"></div>
+            <div style="display: flex; margin-bottom: 1rem;">
+              <input id="check_return" class="form-control" type="checkbox">
+              <label style="line-height: 12px;">I am confirming the above information is accurate.</label>
+            </div>
+            <button type="submit" class="woocommerce-button button w-100" disabled>Submit</button>
+          </div>
+        </div>
+      </form>
+      <?php
+    }
+  }
+}
+
+if( ! function_exists( 'sc_return_item_html' ) ){
+  /**
+  * helper function helps to reduce which id to use - product or variation
+  * @param array $item - array of item returned from WC_ORDER->get_items();
+  * @return string $actual_id - the proper id to use.
+  */
+  function msp_get_actual_id( $item ){
+    return ( empty( $item['variation_id'] ) ) ? $item['product_id'] : $item['variation_id'];
+  }
+}
+
 add_action( 'msp_after_my_account_order_actions', 'sc_return_item_html', 5, 1 );
 if( ! function_exists( 'sc_return_item_html' ) ){
   /**
@@ -40,7 +168,10 @@ if( ! function_exists( 'sc_return_item_html' ) ){
   */
   function sc_return_item_html( $order_id ){
     // TODO: Add logic which will only display the button if an order can be returned
-    $return_btn = '<a href="'. get_site_url( ) .'/returns?id='. $order_id .'" class="woocommerce-button button">Return</a>';
+    $order = wc_get_order( $order_id );
+    $email = $order->get_billing_email();
+    $link = get_site_url( ) . '/returns?id='. $order_id . '&email=' . $email;
+    $return_btn = '<a href="'. $link .'" class="woocommerce-button button">Return</a>';
     echo $return_btn;
   }
 
