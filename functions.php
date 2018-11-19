@@ -14,6 +14,13 @@ add_action( 'wp_enqueue_scripts', 'msp_enqueue_scripts');
 add_shortcode( 'return_form', 'msp_return_form_dispatcher' );
 add_action( 'admin_init', 'msp_register_settings');
 
+add_filter( 'wp_mail_from', function( $email ) {
+	return 'returns@'. get_bloginfo( 'name' ) .'.com';
+});
+add_filter( 'wp_mail_from_name', function( $email ) {
+	return get_bloginfo( 'name' );
+});
+
 function wpdocs_set_html_mail_content_type() {
     return 'text/html';
 }
@@ -228,6 +235,8 @@ if( ! function_exists( 'msp_create_return_email' ) ){
     }
     // echo $message;
     wp_mail( $args['to'], $args['subject'], $message );
+    wp_mail( $returns['email'], 'We got your return Request!', '<h2>We got your return Request, expect a response in 1-2 business days.</h2>' );
+    wp_redirect( '/' );
   }
 }
 
