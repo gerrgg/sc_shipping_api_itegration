@@ -43,7 +43,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders );
 				$item_count    = $order->get_item_count();
 				$tracking_info = sc_bundle_tracking_info( $order->get_id() );
 				$func_to_call = 'sc_get_' . $tracking_info['shipper'] . '_delivery_date';
-				$output = $func_to_call( $tracking_info['tracking'] );
+				$output = $func_to_call( $tracking_info['tracking'], $order->get_id() );
 				if( get_option( 'msp_log_to_file' ) ){
 					sc_debug_log( array(
 						'time' => date( 'm/d/Y', time() ),

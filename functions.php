@@ -11,6 +11,11 @@ add_action( 'wp_enqueue_scripts', 'msp_enqueue_scripts');
 add_shortcode( 'return_form', 'msp_return_form_dispatcher' );
 add_action( 'admin_init', 'msp_register_settings');
 
+function wpdocs_set_html_mail_content_type() {
+    return 'text/html';
+}
+add_filter( 'wp_mail_content_type', 'wpdocs_set_html_mail_content_type' );
+
 function msp_enqueue_scripts(){
   wp_enqueue_style( 'style', plugin_dir_url( __FILE__ ) . '/style.css', false, rand(1, 1000), 'all' );
   wp_enqueue_script( 'script', plugin_dir_url( __FILE__ ) . '/main.js', array( 'jquery' ), rand(1, 1000) );
@@ -26,6 +31,70 @@ function msp_register_settings(){
   register_setting( 'msp_shipping_creds', 'msp_fedex_user_name' );
   register_setting( 'msp_shipping_creds', 'msp_fedex_password' );
   register_setting( 'msp_shipping_creds', 'msp_log_to_file' );
+  register_setting( 'msp_shipping_creds', 'msp_send_return_email_to' );
+}
+
+if( ! function_exists( 'msp_ship_menu_html' ) ){
+  /**
+  *
+  * Creates the spot in the backend for user to enter credentials.
+  * removes hand coded sensitive materials.
+  *
+  */
+  function msp_ship_menu_html(){
+    ?>
+    <div class="wrap">
+      <h1>Michgian Safety Products Shipping Integration</h1>
+      <div class="ups">
+        <form method="post" action="options.php">
+          <?php
+          settings_fields( 'msp_shipping_creds' );
+          do_settings_sections( 'msp_shipping_creds' );
+          ?>
+          <table class="form-table">
+            <tr valign="top">
+              <th scope="row">UPS API KEY</th>
+              <td><input type="text" name="msp_ups_api_key" value="<?php echo esc_attr( get_option('msp_ups_api_key') ); ?>" /></td>
+            </tr>
+
+            <tr valign="top">
+              <th scope="row">UPS USER NAME</th>
+              <td><input type="text" name="msp_ups_user_name" value="<?php echo esc_attr( get_option('msp_ups_user_name') ); ?>" /></td>
+            </tr>
+
+            <tr valign="top">
+              <th scope="row">UPS PASSWORD</th>
+              <td><input type="text" name="msp_ups_password" value="<?php echo esc_attr( get_option('msp_ups_password') ); ?>" /></td>
+            </tr>
+
+            <tr valign="top">
+              <th scope="row">USPS USERNAME</th>
+              <td><input type="text" name="msp_usps_user_name" value="<?php echo esc_attr( get_option('msp_usps_user_name') ); ?>" /></td>
+            </tr>
+
+            <tr valign="top">
+              <th scope="row">USPS PASSWORD</th>
+              <td><input type="text" name="msp_usps_password" value="<?php echo esc_attr( get_option('msp_usps_password') ); ?>" /></td>
+            </tr>
+
+            <tr valign="top">
+              <th scope="row">Send Return Emails too</th>
+              <td><input type="text" name="msp_send_return_email_to" value="<?php echo esc_attr( get_option('msp_send_return_email_to') ); ?>" /></td>
+            </tr>
+
+            <tr valign="top">
+              <th scope="row">Check to Log to File</th>
+              <td><input type="checkbox" name="msp_log_to_file" value="1" <?php checked( get_option( 'msp_log_to_file' ) ); ?> /></td>
+            </tr>
+
+
+        </table>
+        <?php submit_button(); ?>
+        </form>
+      </div>
+    </div>
+    <?php
+  }
 }
 
 if( ! function_exists( 'msp_return_form_dispatcher' ) ){
@@ -94,8 +163,14 @@ add_action( 'admin_post_confirm_return', 'msp_confirm_return' );
 add_action( 'admin_post_nopriv_confirm_return', 'msp_confirm_return' );
 
 if( ! function_exists( 'msp_confirm_return' ) ){
+  /**
+  *
+  * Processes data from return request
+  *
+  *
+  */
   function msp_confirm_return(){
-    pre_dump( $_POST );
+    // pre_dump( $_POST );
     $order = wc_get_order( $_POST['order_id'] );
     if( $order ){
       $returns = array(
@@ -108,18 +183,48 @@ if( ! function_exists( 'msp_confirm_return' ) ){
           $product = wc_get_product( $key );
           if( $product ){
             $returns['items'][$key] = array(
-              'name' => $product->get_formatted_name(),
+              'id' => $key,
+              'sku' => $product->get_sku(),
+              'name' => $product->get_name(),
               'weight' => $product->get_weight(),
+              'qty' => $_POST[$key]['how_many'],
+              'reason' => $_POST[$key]['return_reason'],
             );
-
-            // TODO: how do we get the reasons in this array?
-            // TODO: Also include the quantity, even if return_all is yes.
-
           }
         }
       }
-      pre_dump( $returns );
+      msp_create_return_email( $returns, array(
+        'to' => get_option( 'msp_send_return_email_to' ),
+        'subject' => 'Return Request: Order #:' . $returns['order']
+      ) );
     }
+  }
+}
+
+if( ! function_exists( 'msp_create_return_email' ) ){
+  /**
+  *
+  * Takes the formatted data from $_POST and creates a message for emailing
+  * @param array $returns - Order / Item Data
+  * @param array $args - args for the wp_mail function
+  *
+  */
+  function msp_create_return_email( $returns, $args ){
+    $message = '';
+    $message .= '<h3>Customer: ' . $returns['name'] . ' <' . $returns['email'] . '></h3>';
+    $message .= '<h3>Order #: ' . $returns['order'] . '</h3>';
+    $message .= '<h4>I would like to return...</h4>';
+    $message .= '<table style="border: 1px solid #eee;"><thead><th>SKU</th><th>Name</th><th>Quantity</th><th>Reason</th></thead>';
+    foreach( $returns['items'] as $key => $item ){
+      $message .= '<tr style="border-bottom: 1px solid #eee">';
+      $message .= '<td style="border-right: 1px; padding-right: 15px;">'. $item['sku'] .'</td>';
+      $message .= '<td style="border-right: 1px; padding-right: 15px;">'. $item['name'] .'</td>';
+      $message .= '<td style="border-right: 1px; padding-right: 15px;">'. $item['qty'] .'</td>';
+      $message .= '<td style="border-right: 1px; padding-right: 15px;">'. $item['reason'] .'</td>';
+      $message .= '<tr>';
+    }
+    // echo $message;
+    wp_mail( $args['to'], $args['subject'], $message );
   }
 }
 
@@ -223,63 +328,6 @@ if( ! function_exists( 'sc_debug_log' ) ){
   }
 }
 
-if( ! function_exists( 'msp_ship_menu_html' ) ){
-  /**
-  *
-  * Creates the spot in the backend for user to enter credentials.
-  * removes hand coded sensitive materials.
-  *
-  */
-  function msp_ship_menu_html(){
-    ?>
-    <div class="wrap">
-      <h1>Michgian Safety Products Shipping Integration</h1>
-      <div class="ups">
-        <form method="post" action="options.php">
-          <?php
-          settings_fields( 'msp_shipping_creds' );
-          do_settings_sections( 'msp_shipping_creds' );
-          ?>
-          <table class="form-table">
-            <tr valign="top">
-              <th scope="row">UPS API KEY</th>
-              <td><input type="text" name="msp_ups_api_key" value="<?php echo esc_attr( get_option('msp_ups_api_key') ); ?>" /></td>
-            </tr>
-
-            <tr valign="top">
-              <th scope="row">UPS USER NAME</th>
-              <td><input type="text" name="msp_ups_user_name" value="<?php echo esc_attr( get_option('msp_ups_user_name') ); ?>" /></td>
-            </tr>
-
-            <tr valign="top">
-              <th scope="row">UPS PASSWORD</th>
-              <td><input type="text" name="msp_ups_password" value="<?php echo esc_attr( get_option('msp_ups_password') ); ?>" /></td>
-            </tr>
-
-            <tr valign="top">
-              <th scope="row">USPS USERNAME</th>
-              <td><input type="text" name="msp_usps_user_name" value="<?php echo esc_attr( get_option('msp_usps_user_name') ); ?>" /></td>
-            </tr>
-
-            <tr valign="top">
-              <th scope="row">USPS PASSWORD</th>
-              <td><input type="text" name="msp_usps_password" value="<?php echo esc_attr( get_option('msp_usps_password') ); ?>" /></td>
-            </tr>
-
-            <tr valign="top">
-              <th scope="row">Check to Log to File</th>
-              <td><input type="checkbox" name="msp_log_to_file" value="1" <?php checked( get_option( 'msp_log_to_file' ) ); ?> /></td>
-            </tr>
-
-
-        </table>
-        <?php submit_button(); ?>
-        </form>
-      </div>
-    </div>
-    <?php
-  }
-}
 
 if( ! function_exists( 'sc_bundle_tracking_info' ) ){
   /**

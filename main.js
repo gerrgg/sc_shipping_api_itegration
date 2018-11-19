@@ -1,4 +1,5 @@
 jQuery(document).ready(function( $ ){
+  // TODO: Refactor, refactor, refactor!
   var $submit = $( 'button.button' );
   var $check = $('#check_return');
   var $confirm_box = $( '#return-data' );
@@ -23,7 +24,12 @@ jQuery(document).ready(function( $ ){
         $form.append( create_return_all_form( id, qty ) );
       } else {
         $('#' + id + '_return_quantity').html( qty );
-        $form.append( create_return_reason_form( id ) );
+        var hidden_awnser = $('<input/>', {
+                              type: 'hidden',
+                              name: id + '[how_many]',
+                              value: qty
+                            } );
+        $form.append( create_return_reason_form( id ), hidden_awnser );
       }
 
 
@@ -31,12 +37,21 @@ jQuery(document).ready(function( $ ){
       $('.return-all-radio').change(function(){
         var awnser = this.value;
         if( awnser == 'yes' ){
-          $form.append( create_return_reason_form( id ) );
+          if( ! $( '#' + id + '_reason_form' ).length ) $form.append( create_return_reason_form( id ) );
+          // if they say yes, then create a hidden input with value of the order qty
+          var hidden_awnser = $('<input/>', {
+                                type: 'hidden',
+                                id: id + '_how_many_hidden',
+                                name: id + '[how_many]',
+                                value: qty
+                              } );
+          $form.append( hidden_awnser );
           $('#' + id + '_return_quantity').html( qty );
           $('#' + id + '_how_many').remove();
         } else {
           $form.append( create_how_many_form( id ) );
           $('#' + id + '_reason_form').remove();
+          $('#' + id + '_how_many_hidden').remove();
         }
       });
 
