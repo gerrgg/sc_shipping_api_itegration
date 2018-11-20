@@ -42,6 +42,26 @@ function msp_register_settings(){
   register_setting( 'msp_shipping_creds', 'msp_fedex_password' );
   register_setting( 'msp_shipping_creds', 'msp_log_to_file' );
   register_setting( 'msp_shipping_creds', 'msp_send_return_email_to' );
+
+	register_setting( 'msp_shipping_creds', 'msp_ups_account_number' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_company_name' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_attn' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_company_display_name' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_phone' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_tin' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_address_1' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_address_2' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_city' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_state' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_postal_code' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_country_code' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_box_dims_length' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_box_dims_width' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_box_dims_height' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_box_dims_units' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_box_weight_units' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_validation_strictness' );
+	register_setting( 'msp_shipping_creds', 'msp_ups_test_mode' );
 }
 
 if( ! function_exists( 'msp_ship_menu_html' ) ){
@@ -62,6 +82,7 @@ if( ! function_exists( 'msp_ship_menu_html' ) ){
           do_settings_sections( 'msp_shipping_creds' );
           ?>
           <table class="form-table">
+						<h3>API Creds</h3>
             <tr valign="top">
               <th scope="row">UPS API KEY</th>
               <td><input type="text" name="msp_ups_api_key" value="<?php echo esc_attr( get_option('msp_ups_api_key') ); ?>" /></td>
@@ -87,18 +108,130 @@ if( ! function_exists( 'msp_ship_menu_html' ) ){
               <td><input type="text" name="msp_usps_password" value="<?php echo esc_attr( get_option('msp_usps_password') ); ?>" /></td>
             </tr>
 
-            <tr valign="top">
-              <th scope="row">Send Return Emails too</th>
-              <td><input type="text" name="msp_send_return_email_to" value="<?php echo esc_attr( get_option('msp_send_return_email_to') ); ?>" /></td>
-            </tr>
-
-            <tr valign="top">
+						<tr valign="top">
               <th scope="row">Check to Log to File</th>
               <td><input type="checkbox" name="msp_log_to_file" value="1" <?php checked( get_option( 'msp_log_to_file' ) ); ?> /></td>
             </tr>
-
-
         </table>
+
+				<hr>
+				<h3>Returns</h3>
+				<table class="form-table">
+					<h4>Shipper / Shipto</h4>
+					<tr valign="top">
+						<th scope="row">UPS Test Mode</th>
+						<td>
+							<label>Test Mode</label>
+							<input type="radio" name="msp_ups_test_mode" value="wwwcie" <?php if( get_option( 'msp_ups_test_mode' ) == 'wwwcie' ) echo 'checked' ?> />
+							<label>Production Mode</label>
+							<input type="radio" name="msp_ups_test_mode" value="onlinetools" <?php if( get_option( 'msp_ups_test_mode' ) == 'onlinetools' ) echo 'checked' ?> />
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">UPS Account Number</th>
+						<td><input type="text" name="msp_ups_account_number" value="<?php echo esc_attr( get_option('msp_ups_account_number') ); ?>" /></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Company Name</th>
+						<td><input type="text" name="msp_ups_shipper_company_name" value="<?php echo esc_attr( get_option('msp_ups_shipper_company_name') ); ?>" /></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Ship to whose attention?</th>
+						<td><input type="text" name="msp_ups_shipper_attn" value="<?php echo esc_attr( get_option('msp_ups_shipper_attn') ); ?>" /></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Company Display Name</th>
+						<td><input type="text" name="msp_ups_shipper_company_display_name" value="<?php echo esc_attr( get_option('msp_ups_shipper_company_display_name') ); ?>" /></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Phone Number</th>
+						<td><input type="text" name="msp_ups_shipper_phone" value="<?php echo esc_attr( get_option('msp_ups_shipper_phone') ); ?>" /></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Tax Idenification Number</th>
+						<td><input type="text" name="msp_ups_shipper_tin" value="<?php echo esc_attr( get_option('msp_ups_shipper_tin') ); ?>" /></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Address Line 1</th>
+						<td><input type="text" name="msp_ups_shipper_address_1" value="<?php echo esc_attr( get_option('msp_ups_shipper_address_1') ); ?>" /></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Address Line 2</th>
+						<td><input type="text" name="msp_ups_shipper_address_2" value="<?php echo esc_attr( get_option('msp_ups_shipper_address_2') ); ?>" /></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">City</th>
+						<td><input type="text" name="msp_ups_shipper_city" value="<?php echo esc_attr( get_option('msp_ups_shipper_city') ); ?>" /></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">State Code ( MI )</th>
+						<td><input type="text" name="msp_ups_shipper_state" value="<?php echo esc_attr( get_option('msp_ups_shipper_state') ); ?>" /></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Postal Code</th>
+						<td><input type="text" name="msp_ups_shipper_postal_code" value="<?php echo esc_attr( get_option('msp_ups_shipper_postal_code') ); ?>" /></td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Country Code</th>
+						<td><input type="text" name="msp_ups_shipper_country_code" value="<?php echo esc_attr( get_option('msp_ups_shipper_country_code') ); ?>" /></td>
+					</tr>
+				</table>
+				<hr>
+				<table class="form-table">
+					<tr valign="top">
+						<th scope="row">Validation Strictness</th>
+						<td>
+							<select name="msp_ups_validation_strictness">
+								<option value="">Please Select an Option</option>
+								<option value="nonvalidate" <?php if( get_option( 'msp_ups_validation_strictness' ) == 'nonvalidate') echo 'selected'; ?>>Validate Shipto Zip/State</option>
+								<option value="validate" <?php if( get_option( 'msp_ups_validation_strictness' ) == 'validate') echo 'selected';  ?>>Validate Shipto City/State/Zip</option>
+							</select>
+						</td>
+					</tr>
+				</table>
+				<hr>
+				<table class="form-table">
+					<h4>Weight / Dimensions</h4>
+					<tr valign="top">
+						<th scope="row">Default box DIMS (W x L x H) </th>
+						<td>
+							<label>Length:</label>
+							<input type="text" name="msp_ups_box_dims_length" value="<?php echo esc_attr( get_option('msp_ups_box_dims_length') ); ?>" />
+						</td>
+						<td>
+							<label>Width:</label>
+							<input type="text" name="msp_ups_box_dims_width" value="<?php echo esc_attr( get_option('msp_ups_box_dims_width') ); ?>" />
+						</td>
+						<td>
+							<label>Height:</label>
+							<input type="text" name="msp_ups_box_dims_height" value="<?php echo esc_attr( get_option('msp_ups_box_dims_height') ); ?>" />
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Dimensions Unit Type</th>
+						<td>
+							<select name="msp_ups_box_dims_units">
+								<option value="">Please Select an Option</option>
+								<option value="IN" <?php if( get_option( 'msp_ups_box_dims_units' ) == 'IN') echo 'selected'; ?>> Inches</option>
+								<option value="CM" <?php if( get_option( 'msp_ups_box_dims_units' ) == 'CM') echo 'selected'; ?>> Centimeters</option>
+								<option value="00" <?php if( get_option( 'msp_ups_box_dims_units' ) == '00') echo 'selected'; ?>> Metric Units Of Measurement</option>
+								<option value="01" <?php if( get_option( 'msp_ups_box_dims_units' ) == '01') echo 'selected'; ?>> English Units Of Measurement</option>
+							</select>
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Weight Unit Type</th>
+						<td>
+							<select name="msp_ups_box_weight_units">
+								<option value="">Please Select an Option</option>
+								<option value="LBS" <?php if( get_option( 'msp_ups_box_weight_units' ) == 'LBS') echo 'selected'; ?>>Pounds</option>
+								<option value="OZS" <?php if( get_option( 'msp_ups_box_weight_units' ) == 'OZS') echo 'selected'; ?>>Ounces</option>
+								<option value="KGS" <?php if( get_option( 'msp_ups_box_weight_units' ) == 'KGS') echo 'selected'; ?>>Kilograms</option>
+							</select>
+						</td>
+					</tr>
+				</table>
+
         <?php submit_button(); ?>
         </form>
       </div>
@@ -203,12 +336,335 @@ if( ! function_exists( 'msp_confirm_return' ) ){
           }
         }
       }
-      msp_create_return_email( $returns, array(
-        'to' => get_option( 'msp_send_return_email_to' ),
-        'subject' => 'Return Request: Order #:' . $returns['order']
-      ) );
+      // msp_create_return_email( $returns, array(
+      //   'to' => get_option( 'msp_send_return_email_to' ),
+      //   'subject' => 'Return Request: Order #:' . $returns['order']
+      // ) );
+
+			msp_shipment_confirm_request( $returns );
     }
   }
+}
+
+if( ! function_exists( 'msp_shipment_confirm_request' ) ){
+  /**
+  *
+  * creates and sends ups shipping confirm
+	*	@param array $data - data for ship request
+  *
+  */
+	function msp_shipment_confirm_request( $data ){
+		$accessRequest = sc_ups_create_access_request_xml();
+		$shipmentConfirmRequest = sc_ups_create_shipment_confirm_request( $data );
+		$xml = $accessRequest->asXML() . $shipmentConfirmRequest->asXML();
+
+		$response = sc_get_xml_by_curl( 'https://'. get_option( 'msp_ups_test_mode' ) .'.ups.com/ups.app/xml/ShipConfirm', $xml );
+		if( $response['Response']['ResponseStatusCode'] ){
+			msp_shipment_accept_request( $response );
+		} else {
+			pre_dump( $response );
+			return $response['Response']['ResponseStatusDescription'];
+		}
+
+	}
+}
+
+if( ! function_exists( 'msp_shipment_accept_request' ) ){
+  /**
+  *
+  * creates the msp_shipment_accept_request
+  *
+  */
+	function msp_shipment_accept_request( $response ){
+		$access_request = sc_ups_create_access_request_xml();
+		$shipment_accept_request = msp_create_shipment_accept_request( $response );
+		$xml = $access_request->asXML() . $shipment_accept_request->asXML();
+		$response = sc_get_xml_by_curl( 'https://'. get_option( 'msp_ups_test_mode' ) .'.ups.com/ups.app/xml/ShipAccept', $xml );
+
+		if( $response['Response']['ResponseStatusCode'] ){
+			pre_dump( $response );
+			// msp_save_ups_label( $response );
+		} else {
+			return $response['Response']['ResponseStatusDescription'];
+		}
+
+	}
+}
+
+function msp_save_ups_label( $response ){
+	$upload_dir = wp_upload_dir();
+	$write_to = $upload_dir['basedir'] . '/returns';
+
+	if( ! file_exists( $write_to ) ) mkdir( $write_to );
+
+	$order_id = $response['Response']['TransactionReference']['CustomerContext'];
+	$base64_img = $response['ShipmentResults']['PackageResults']['LabelImage']['GraphicImage'];
+
+	$label_file = $order_id . ".gif";
+	$base64_string = $response['ShipmentResults']['PackageResults']['LabelImage']['GraphicImage'];
+	$ifp = fopen($write_to . '/' . $label_file, 'wb');
+	fwrite($ifp, base64_decode($base64_string));
+	fclose($ifp);
+
+	return $write_to . '/' . $label_file;
+}
+
+if( ! function_exists( 'msp_label_recovery_request' ) ){
+  /**
+  *
+  * creates label recovery request
+  *
+  */
+	function msp_label_recovery_request( $access_request, $response ){
+		$labelRequest = new SimpleXMLElement( '<LabelRecoveryRequest></LabelRecoveryRequest>' );
+
+		$labelRequest->addChild( 'Request' );
+		$labelRequest->Request->addChild( 'TransactionReference' );
+		$labelRequest->Request->TransactionReference->addChild( 'CustomerContext',  $response['Response']['TransactionReference']['CustomerContext'] );
+		$labelRequest->Request->addChild( 'RequestAction',  'LabelRecovery' );
+
+		$labelRequest->addChild( 'LabelSpecification' );
+		$labelRequest->LabelSpecification->addChild( 'LabelImageFormat' );
+		$labelRequest->LabelSpecification->LabelImageFormat->addChild( 'Code', 'GIF' );
+
+		$labelRequest->addChild( 'LabelDelivery' );
+		$labelRequest->LabelDelivery->addChild( 'LabelDelivery' );
+
+		$labelRequest->addChild( 'TrackingNumber', $response['ShipmentResults']['ShipmentIdentificationNumber'] );
+
+		$xml = $access_request->asXML() . $labelRequest->asXML();
+
+		$response = sc_get_xml_by_curl( 'https://'. get_option( 'msp_ups_test_mode' ) .'.ups.com/ups.app/xml/LabelRecovery', $xml );
+
+	}
+}
+
+function base64_to_img( $base64_string, $output_file ) {
+    $ifp = fopen( $output_file, "wb" );
+    fwrite( $ifp, base64_decode( $base64_string) );
+    fclose( $ifp );
+    return( $output_file );
+}
+
+if( ! function_exists( 'msp_create_shipment_accept_request' ) ){
+  /**
+  *
+  * creates the ShipmentAcceptRequest xml
+  *
+  */
+	function msp_create_shipment_accept_request( $response ){
+		$accept = new SimpleXMLElement( '<ShipmentAcceptRequest></ShipmentAcceptRequest>' );
+
+		$accept->addChild( 'Request' );
+		$accept->Request->addChild( 'CustomerContext', $response['Response']['TransactionReference']['CustomerContext'] );
+		$accept->Request->addChild( 'RequestAction', 'ShipAccept' );
+		$accept->Request->addChild( 'RequestOption', '01' );
+
+		$accept->addChild( 'ShipmentDigest', $response['ShipmentDigest'] );
+
+		return $accept;
+	}
+}
+
+if( ! function_exists( 'sc_ups_create_shipment_confirm_request' ) ){
+  /**
+  *
+  * creates the shipment xml
+  *
+  */
+	function sc_ups_create_shipment_confirm_request( $data ){
+		$shipmentConfirmRequest = new SimpleXMLElement('<ShipmentConfirmRequest></ShipmentConfirmRequest>');
+		$request = msp_ups_create_shipment_request( $data['order'] );
+		$shipment = msp_ups_create_shipment( $data );
+		$label = msp_ups_create_label();
+
+		sxml_append( $shipmentConfirmRequest, $request );
+		sxml_append( $shipmentConfirmRequest, $shipment );
+		sxml_append( $shipmentConfirmRequest, $label );
+
+		return $shipmentConfirmRequest;
+
+	}
+}
+
+function sxml_append(SimpleXMLElement $to, SimpleXMLElement $from) {
+	// https://stackoverflow.com/questions/4778865/php-simplexml-addchild-with-another-simplexmlelement
+	// LIFESAVER ^^^
+    $toDom = dom_import_simplexml($to);
+    $fromDom = dom_import_simplexml($from);
+    $toDom->appendChild($toDom->ownerDocument->importNode($fromDom, true));
+}
+
+if( ! function_exists( 'msp_ups_create_label' ) ){
+  /**
+  *
+  * creates the ups xml for label specification
+  *
+  */
+	function msp_ups_create_label( ){
+		$label = new SimpleXMLElement('<LabelSpecification></LabelSpecification>');
+
+		$label->addChild( 'LabelPrintMethod' );
+		$label->LabelPrintMethod->addChild( 'Code', 'GIF' );
+		$label->LabelPrintMethod->addChild( 'Description', 'GIF' );
+
+		$label->addChild( 'LabelImageFormat' );
+		$label->LabelImageFormat->addChild( 'Code', 'GIF' );
+		$label->LabelImageFormat->addChild( 'Description', 'GIF' );
+
+		$label->addChild( 'HTTPUserAgent', $_SERVER['HTTP_USER_AGENT'] );
+
+		return $label;
+	}
+}
+
+if( ! function_exists( 'msp_ups_create_shipment' ) ){
+  /**
+  *
+  * creates the shipment xml
+  *
+	*/
+	function msp_ups_create_shipment( $data ){
+		$order = wc_get_order( $data['order'] );
+
+		$shipment = new SimpleXMLElement( '<Shipment></Shipment>' );
+
+		// TODO: Add return service options
+		$shipment->addChild( 'ReturnService' );
+		$shipment->ReturnService->addChild( 'Code', '8' );
+
+		$shipment->addChild( 'ShipmentServiceOptions' );
+		$shipment->ShipmentServiceOptions->addChild( 'LabelDelivery' );
+		$shipment->ShipmentServiceOptions->LabelDelivery->addChild( 'EMailMessage' );
+		$shipment->ShipmentServiceOptions->LabelDelivery->EMailMessage->addChild( 'EMailAddress', $order->get_billing_email() );
+		$shipment->ShipmentServiceOptions->LabelDelivery->EMailMessage->addChild( 'FromEMailAddress', 'gregbast1994@gmail.com' );
+		$shipment->ShipmentServiceOptions->LabelDelivery->EMailMessage->addChild( 'FromName', get_bloginfo( 'name' ) );
+		$shipment->ShipmentServiceOptions->LabelDelivery->EMailMessage->addChild( 'Memo', 'Here\'s your shipping label!' );
+		$shipment->ShipmentServiceOptions->LabelDelivery->EMailMessage->addChild( 'Subject', 'Here\'s your shipping label!' );
+
+
+		$shipment->addChild( 'Shipper' );
+
+		$shipment->Shipper->addChild( 'Name', get_option( 'msp_ups_shipper_company_name' ) );
+		$shipment->Shipper->addChild( 'AttentionName', get_option( 'msp_ups_shipper_attn' ) );
+		$shipment->Shipper->addChild( 'CompanyDisplayableName', get_option( 'msp_ups_shipper_company_display_name' ) );
+		$shipment->Shipper->addChild( 'PhoneNumber', get_option( 'msp_ups_shipper_phone' ) );
+		$shipment->Shipper->addChild( 'ShipperNumber', get_option( 'msp_ups_account_number' ) );
+		$shipment->Shipper->addChild( 'TaxIdentificationNumber', get_option( 'msp_ups_shipper_tin' ) );
+
+		$shipment->Shipper->addChild( 'Address' );
+		$shipment->Shipper->Address->addChild( 'AddressLine1', get_option( 'msp_ups_shipper_tin' ) );
+		$shipment->Shipper->Address->addChild( 'City', get_option( 'msp_ups_shipper_city' ) );
+		$shipment->Shipper->Address->addChild( 'StateProvinceCode', get_option( 'msp_ups_shipper_state' ) );
+		$shipment->Shipper->Address->addChild( 'PostalCode', get_option( 'msp_ups_shipper_postal_code' ) );
+		$shipment->Shipper->Address->addChild( 'CountryCode', get_option( 'msp_ups_shipper_country_code' ) );
+
+		$shipment->addChild( 'ShipTo' );
+		$shipment->ShipTo->addChild( 'CompanyName', get_option( 'msp_ups_shipper_company_name' ) );
+		$shipment->ShipTo->addChild( 'AttentionName', get_option( 'msp_ups_shipper_attn' ) );
+		$shipment->ShipTo->addChild( 'PhoneNumber', get_option( 'msp_ups_shipper_phone' ) );
+
+		$shipment->ShipTo->addChild( 'Address' );
+		$shipment->ShipTo->Address->addChild( 'AddressLine1', get_option( 'msp_ups_shipper_address_1' ) );
+		$shipment->ShipTo->Address->addChild( 'City', get_option( 'msp_ups_shipper_city' ) );
+		$shipment->ShipTo->Address->addChild( 'StateProvinceCode', get_option( 'msp_ups_shipper_state' ) );
+		$shipment->ShipTo->Address->addChild( 'PostalCode', get_option( 'msp_ups_shipper_postal_code' ) );
+		$shipment->ShipTo->Address->addChild( 'CountryCode', get_option( 'msp_ups_shipper_country_code' ) );
+
+		$shipment->addChild( 'ShipFrom' );
+		$shipment->ShipFrom->addChild( 'CompanyName', $order->get_billing_company() );
+		$shipment->ShipFrom->addChild( 'AttentionName', $data['name'] );
+		$shipment->ShipFrom->addChild( 'AttentionName', $order->get_billing_phone() );
+
+		$shipment->ShipFrom->addChild( 'Address' );
+		$shipment->ShipFrom->Address->addChild( 'AddressLine1', $order->get_shipping_address_1() );
+		$shipment->ShipFrom->Address->addChild( 'AddressLine2', $order->get_shipping_address_2() );
+		$shipment->ShipFrom->Address->addChild( 'City', $order->get_shipping_city() );
+		$shipment->ShipFrom->Address->addChild( 'StateProvinceCode', $order->get_shipping_state() );
+		$shipment->ShipFrom->Address->addChild( 'PostalCode', $order->get_shipping_postcode() );
+		$shipment->ShipFrom->Address->addChild( 'CountryCode', $order->get_shipping_country() );
+
+		$shipment->addChild( 'PaymentInformation' );
+		$shipment->PaymentInformation->addChild( 'Prepaid' );
+		$shipment->PaymentInformation->Prepaid->addChild( 'BillShipper' );
+		$shipment->PaymentInformation->Prepaid->BillShipper->addChild( 'AccountNumber', get_option( 'msp_ups_account_number' ) );
+
+		$shipment->addChild( 'Service' );
+		$shipment->Service->addChild( 'Code', '03' );
+		// TODO: Add option?
+		$shipment->Service->addChild( 'Description', 'Ground' );
+
+		$shipment->addChild( 'Package' );
+		// TODO: Add more detail to the order return.
+		$shipment->Package->addChild( 'Description', msp_get_store_description( $data['order'] ) );
+
+		$shipment->Package->addChild( 'PackagingType' );
+		// TODO: Add option
+		$shipment->Package->PackagingType->addChild( 'Code', '02' );
+		$shipment->Package->PackagingType->addChild( 'Description', 'Customer Supplied Package' );
+
+		$shipment->Package->addChild( 'Dimensions' );
+		$shipment->Package->Dimensions->addChild( 'UnitOfMeasurement' );
+		$shipment->Package->Dimensions->UnitOfMeasurement->addChild( 'Code', get_option( 'msp_ups_box_dims_units' ) );
+		$shipment->Package->Dimensions->addChild( 'Length', get_option( 'msp_ups_box_dims_length' ) );
+		$shipment->Package->Dimensions->addChild( 'Width', get_option( 'msp_ups_box_dims_width' ) );
+		$shipment->Package->Dimensions->addChild( 'Height', get_option( 'msp_ups_box_dims_height' ) );
+
+		$shipment->Package->addChild( 'PackageWeight' );
+		$shipment->Package->PackageWeight->addChild( 'UnitOfMeasurement' );
+		$shipment->Package->PackageWeight->UnitOfMeasurement->addChild( 'Code', 'LBS' );
+		$shipment->Package->PackageWeight->addChild( 'Weight', msp_get_package_weight( $data['items'] ) );
+
+		return $shipment;
+	}
+}
+
+function msp_get_store_description( $order_id ){
+	return substr( get_bloginfo( 'name' ) . ' #: ' . $order_id, 0, 35 );
+}
+
+if( ! function_exists( 'msp_get_package_weight' ) ){
+  /**
+  *
+  * returns an educated guess of package weight
+	* @param array $items - items the user wishes to return, and data about those items
+	* @param int $weight - a quick estimation of package weight using item weight + qty
+  *
+  */
+	function msp_get_package_weight( $items ){
+		$weight = 8;
+		foreach( $items as $item ){
+			$item_weight = $item['weight'] * $item['qty'];
+			$weight += $item_weight;
+		}
+
+		$convert_unit = get_option( 'msp_ups_box_weight_units' );
+
+		if( $convert_unit == 'OZS' ){
+			return $weight / 16;
+		} else if( $convert_unit == 'KGS' ){
+			return $weight * 2.205;
+		} else {
+			return $weight;
+		}
+
+	}
+}
+
+if( ! function_exists( 'msp_ups_create_shipment_request' ) ){
+  /**
+  *
+  * creates the shipment xml
+  *
+  */
+	function msp_ups_create_shipment_request( $order_id ){
+		$request = new SimpleXMLElement( '<Request></Request>' );
+		$request->addChild( 'TransactionReference');
+		$request->TransactionReference->addChild( 'CustomerContext', $order_id );
+		$request->addChild( 'RequestAction', 'ShipConfirm' );
+		$request->addChild( 'RequestOption', 'nonvalidate' );
+		return $request;
+	}
 }
 
 if( ! function_exists( 'msp_create_return_email' ) ){
@@ -331,6 +787,7 @@ if( ! function_exists( 'sc_setup_shipping_integration' ) ){
   }
 }
 
+
 if( ! function_exists( 'sc_debug_log' ) ){
   /**
   *
@@ -369,7 +826,7 @@ if( ! function_exists( 'sc_get_ups_delivery_date' ) ){
     $accessRequest = sc_ups_create_access_request_xml( );
     $trackRequestXML = sc_ups_create_tracking_request_xml( $tracking );
     $requestXML = $accessRequest->asXML() . $trackRequestXML->asXML();
-    $response = sc_get_xml_by_curl( 'https://onlinetools.ups.com/ups.app/xml/Track', $requestXML );
+    $response = sc_get_xml_by_curl( 'https://'. get_option( 'msp_ups_test_mode' ) .'.ups.com/ups.app/xml/Track', $requestXML );
     return sc_format_date_and_return( $response );
   }
 }

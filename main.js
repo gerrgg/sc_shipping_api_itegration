@@ -12,6 +12,7 @@ jQuery(document).ready(function( $ ){
     var src = $image.find( 'img' ).attr('src');
 
     // allows form to easily pop in and out;
+    // TODO: Add logic to allow for exhanges!
     if( ! $form.hasClass( 'show' ) ) {
       $form.addClass( 'show' );
       $image.attr( 'aria-checked', 'true' );
