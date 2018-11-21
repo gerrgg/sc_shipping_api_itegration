@@ -10,9 +10,15 @@ Text Domain: msp-shipping
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+require_once( plugin_dir_path( __FILE__ ) . '/msp_shipping.php' );
+
 add_action( 'wp_enqueue_scripts', 'msp_enqueue_scripts');
 add_shortcode( 'return_form', 'msp_return_form_dispatcher' );
 add_action( 'admin_init', 'msp_register_settings');
+add_action( 'admin_post_confirm_return', 'msp_confirm_return' );
+add_action( 'admin_post_nopriv_confirm_return', 'msp_confirm_return' );
+add_action( 'admin_menu', 'sc_setup_shipping_integration' );
+add_action( 'msp_after_my_account_order_actions', 'sc_return_item_html', 5, 1 );
 
 add_filter( 'wp_mail_from', function( $email ) {
 	return 'returns@'. get_bloginfo( 'name' ) .'.com';
@@ -24,6 +30,7 @@ add_filter( 'wp_mail_from_name', function( $email ) {
 function wpdocs_set_html_mail_content_type() {
     return 'text/html';
 }
+
 add_filter( 'wp_mail_content_type', 'wpdocs_set_html_mail_content_type' );
 
 function msp_enqueue_scripts(){
@@ -42,7 +49,6 @@ function msp_register_settings(){
   register_setting( 'msp_shipping_creds', 'msp_fedex_password' );
   register_setting( 'msp_shipping_creds', 'msp_log_to_file' );
   register_setting( 'msp_shipping_creds', 'msp_send_return_email_to' );
-
 	register_setting( 'msp_shipping_creds', 'msp_ups_account_number' );
 	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_company_name' );
 	register_setting( 'msp_shipping_creds', 'msp_ups_shipper_attn' );
@@ -62,7 +68,6 @@ function msp_register_settings(){
 	register_setting( 'msp_shipping_creds', 'msp_ups_box_weight_units' );
 	register_setting( 'msp_shipping_creds', 'msp_ups_validation_strictness' );
 	register_setting( 'msp_shipping_creds', 'msp_ups_test_mode' );
-
 	register_setting( 'msp_shipping_creds', 'msp_return_by' );
 }
 
@@ -82,6 +87,9 @@ if( ! function_exists( 'msp_ship_menu_html' ) ){
           <?php
           settings_fields( 'msp_shipping_creds' );
           do_settings_sections( 'msp_shipping_creds' );
+
+					$msp = new MSP_Shipping();
+					echo $msp->get_ups_api_key();
           ?>
           <table class="form-table">
 						<h3>API Creds</h3>
@@ -308,9 +316,6 @@ if( ! function_exists( 'msp_validate_user' ) ){
   }
 }
 
-add_action( 'admin_post_confirm_return', 'msp_confirm_return' );
-add_action( 'admin_post_nopriv_confirm_return', 'msp_confirm_return' );
-
 if( ! function_exists( 'msp_confirm_return' ) ){
   /**
   *
@@ -393,7 +398,6 @@ if( ! function_exists( 'msp_shipment_accept_request' ) ){
 		} else {
 			return $response['Response']['ResponseStatusDescription'];
 		}
-
 	}
 }
 
@@ -625,8 +629,16 @@ if( ! function_exists( 'msp_ups_create_shipment' ) ){
 	}
 }
 
-function msp_get_store_description( $order_id ){
-	return substr( get_bloginfo( 'name' ) . ' #: ' . $order_id, 0, 35 );
+if( ! function_exists( 'msp_get_store_description' ) ){
+	/**
+	*
+	* gets store
+	*
+	*/
+	function msp_get_store_description( $order_id ){
+		return substr( get_bloginfo( 'name' ) . ' #: ' . $order_id, 0, 35 );
+	}
+
 }
 
 if( ! function_exists( 'msp_get_package_weight' ) ){
@@ -764,7 +776,6 @@ if( ! function_exists( 'sc_return_item_html' ) ){
   }
 }
 
-add_action( 'msp_after_my_account_order_actions', 'sc_return_item_html', 5, 1 );
 if( ! function_exists( 'sc_return_item_html' ) ){
   /**
   * determines if the user can return the item, if so than display return link.
@@ -787,7 +798,6 @@ if( ! function_exists( 'sc_return_item_html' ) ){
   }
 }
 
-add_action( 'admin_menu', 'sc_setup_shipping_integration' );
 if( ! function_exists( 'sc_setup_shipping_integration' ) ){
   /**
   *
@@ -800,7 +810,6 @@ if( ! function_exists( 'sc_setup_shipping_integration' ) ){
   }
 }
 
-
 if( ! function_exists( 'sc_debug_log' ) ){
   /**
 	* @param array $data - prepackaged arryay full of data like shipper & tracking Link.
@@ -810,7 +819,6 @@ if( ! function_exists( 'sc_debug_log' ) ){
     file_put_contents( plugin_dir_path( __FILE__ ) . 'msp_debug.txt', print_r( $data, TRUE ), FILE_APPEND );
   }
 }
-
 
 if( ! function_exists( 'sc_bundle_tracking_info' ) ){
   /**
