@@ -62,6 +62,8 @@ function msp_register_settings(){
 	register_setting( 'msp_shipping_creds', 'msp_ups_box_weight_units' );
 	register_setting( 'msp_shipping_creds', 'msp_ups_validation_strictness' );
 	register_setting( 'msp_shipping_creds', 'msp_ups_test_mode' );
+
+	register_setting( 'msp_shipping_creds', 'msp_return_by' );
 }
 
 if( ! function_exists( 'msp_ship_menu_html' ) ){
@@ -126,6 +128,10 @@ if( ! function_exists( 'msp_ship_menu_html' ) ){
 							<label>Production Mode</label>
 							<input type="radio" name="msp_ups_test_mode" value="onlinetools" <?php if( get_option( 'msp_ups_test_mode' ) == 'onlinetools' ) echo 'checked' ?> />
 						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row">Return Policy</th>
+						<td><input type="number" name="msp_return_by" value="<?php echo esc_attr( get_option('msp_return_by') ); ?>" /></td>
 					</tr>
 					<tr valign="top">
 						<th scope="row">UPS Account Number</th>
@@ -761,17 +767,24 @@ if( ! function_exists( 'sc_return_item_html' ) ){
 add_action( 'msp_after_my_account_order_actions', 'sc_return_item_html', 5, 1 );
 if( ! function_exists( 'sc_return_item_html' ) ){
   /**
-  *
+  * determines if the user can return the item, if so than display return link.
+	*
+	* @param string - Order ID
   */
   function sc_return_item_html( $order_id ){
-    // TODO: Add logic which will only display the button if an order can be returned
     $order = wc_get_order( $order_id );
-    $email = $order->get_billing_email();
-    $link = get_site_url( ) . '/returns?id='. $order_id . '&email=' . $email;
-    $return_btn = '<a href="'. $link .'" class="woocommerce-button button">Return</a>';
-    echo $return_btn;
-  }
 
+		$delivered = $order->get_date_completed()->modify( '+5 days' );
+		$return_by = $delivered->modify( '+' . get_option( 'msp_return_by' ) . ' days' );
+
+		$today = new DateTime();
+		if( $today <= $return_by ){
+			$email = $order->get_billing_email();
+			$link = get_site_url( ) . '/returns?id='. $order_id . '&email=' . $email;
+			$return_btn = '<a href="'. $link .'" class="woocommerce-button button">Return</a>';
+			echo $return_btn;
+		}
+  }
 }
 
 add_action( 'admin_menu', 'sc_setup_shipping_integration' );
@@ -790,7 +803,8 @@ if( ! function_exists( 'sc_setup_shipping_integration' ) ){
 
 if( ! function_exists( 'sc_debug_log' ) ){
   /**
-  *
+	* @param array $data - prepackaged arryay full of data like shipper & tracking Link.
+  * Logs the output of delivery dates, used to catch errors
   */
   function sc_debug_log( $data ){
     file_put_contents( plugin_dir_path( __FILE__ ) . 'msp_debug.txt', print_r( $data, TRUE ), FILE_APPEND );
@@ -835,7 +849,7 @@ if( ! function_exists( 'sc_format_date_and_return' ) ){
   /**
   *
   * @param array $shipment - ups tracking api response
-  *
+	* @return string - output the api response
   *
   */
   function sc_format_date_and_return( $shipment ){
@@ -857,7 +871,8 @@ if( ! function_exists( 'sc_format_date_and_return' ) ){
 if( ! function_exists( 'sc_get_fedex_delivery_date' ) ){
   /**
   *
-  * creates fedex xml file and recieves data via cURL
+  * TODO: Get fedex API to work
+	* TODO: At the very least, find a way to get delivery date.
   *
   */
   function sc_get_fedex_delivery_date( $tracking ){
